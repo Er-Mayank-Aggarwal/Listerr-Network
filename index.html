@@ -23,6 +23,35 @@
   <script type="module" src="firebase-login.js"></script>
   <script src="phone-helper.js"></script>
   <style>
+        /* Animation for audio icon pop */
+        .audio-pop {
+          animation: audioPop 0.35s;
+        }
+        @keyframes audioPop {
+          0% { transform: scale(1); }
+          40% { transform: scale(1.25); }
+          60% { transform: scale(0.95); }
+          100% { transform: scale(1); }
+        }
+        #audio-toggle {
+          transition: background 0.2s, box-shadow 0.2s;
+        }
+        #audio-toggle.audio-on {
+          background: #4280FD;
+          box-shadow: 0 2px 12px rgba(66,128,253,0.18);
+        }
+        #audio-toggle.audio-off {
+          background: #eee;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
+        #audio-toggle .fa-volume-high {
+          color: #fff;
+          text-shadow: 0 2px 8px rgba(66,128,253,0.18);
+        }
+        #audio-toggle .fa-volume-xmark {
+          color: #4280FD;
+          text-shadow: 0 2px 8px rgba(66,128,253,0.10);
+        }
     :root {
       --listerr-blue: #4280FD;
       --listerr-grey: #474747;
@@ -364,10 +393,16 @@
       <div class="header-left-group">
         <img class="header-user-img" id="store-logo" src="" alt="Store Logo" style="display:none;"
           onload="this.style.display='block'" />
-
         <div class="header-logo" id="store-name">Loading...</div>
-
         <button class="header-follow-btn" id="follow-btn" onclick="toggleFollow(this)">Follow</button>
+      </div>
+      <div id="top-right-buttons" style="display: flex; gap: 3px; align-items: center; pointer-events: auto; position: absolute; top: 10px; right: 40px; height: 100%;">
+        <button id="audio-toggle" title="Toggle Audio" style="background: none; border: none; cursor: pointer; font-size: 22px; padding: 6px; border-radius: 50%; transition: background 0.2s;">
+          <span id="audio-icon"><i class="fa-solid fa-volume-xmark"></i></span>
+        </button>
+        <button id="share-btn" title="Share" style="background: none; border: none; cursor: pointer; font-size: 22px; padding: 6px; border-radius: 50%; transition: background 0.2s;">
+          <span><i class="fa-solid fa-share-from-square"></i></span>
+        </button>
       </div>
     </div>
     <div id="login-modal" class="login-overlay" onclick="hideLoginModal(event)">
@@ -417,6 +452,54 @@
     </div>
   <script type="module" src="firebase-login.js"></script>
     <script>
+      // Audio and Share button logic
+      let audioOn = false;
+      const audioIcon = document.getElementById('audio-icon');
+      const audioToggle = document.getElementById('audio-toggle');
+      function updateAudioToggleStyle() {
+        audioToggle.classList.remove('audio-on', 'audio-off');
+        audioToggle.classList.add(audioOn ? 'audio-on' : 'audio-off');
+      }
+      audioToggle.addEventListener('click', () => {
+        audioOn = !audioOn;
+        audioIcon.innerHTML = audioOn
+          ? '<i class="fa-solid fa-volume-high"></i>'
+          : '<i class="fa-solid fa-volume-xmark"></i>';
+        const video = document.getElementById('video-el');
+        if (video) {
+          video.muted = !audioOn;
+        }
+        updateAudioToggleStyle();
+        // Animation
+        audioIcon.classList.remove('audio-pop');
+        void audioIcon.offsetWidth; // force reflow
+        audioIcon.classList.add('audio-pop');
+      });
+      // Set initial style
+      updateAudioToggleStyle();
+
+      const shareBtn = document.getElementById('share-btn');
+      shareBtn.addEventListener('click', async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: document.title,
+              url: window.location.href
+            });
+          } catch (err) {
+            alert('Share cancelled or failed.');
+          }
+        } else {
+          // Fallback: copy URL
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(window.location.href);
+            alert('URL copied to clipboard!');
+          } else {
+            alert('Sharing not supported.');
+          }
+        }
+      });
+
       function startResendTimer() {
   let seconds = 30;
   const timerSpan = document.getElementById('resend-timer');
