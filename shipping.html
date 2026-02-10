@@ -779,23 +779,23 @@
     </div>
 
     <div class="delivery-tabs">
-        <button class="delivery-tab active" onclick="switchTab('instore')">
-            <i class="fas fa-store-alt"></i> IN-STORE
-        </button>
-        <button class="delivery-tab" onclick="switchTab('pickup')">
+        <button class="delivery-tab active" onclick="switchTab('pickup')">
             <i class="fas fa-walking"></i> SELF PICKUP
+        </button>
+        <button class="delivery-tab" onclick="switchTab('instore')">
+            <i class="fas fa-store-alt"></i> IN-STORE
         </button>
         <button class="delivery-tab" onclick="switchTab('standard')">
             <i class="fas fa-truck"></i> DELIVERY
         </button>
     </div>
 
-    <div class="section-container" id="instore-section">
+    <div class="section-container" id="instore-section" style="display: none;">
         <div class="section-title">In-Store Billing</div>
         <p style="font-size: 14px; color: var(--text-light);">Place your order and show your Order ID at the counter. No delivery charges apply.</p>
     </div>
 
-    <div class="section-container" id="self-pickup-section" style="display: none;">
+    <div class="section-container" id="self-pickup-section">
         <div class="section-title">Store Pickup Location</div>
         <div class="current-address">
             <i class="fas fa-map-marker-alt"></i>
@@ -994,7 +994,7 @@ let mapMarker = null;
 
 let userAddresses = [];
 let selectedAddrId = null;
-let currentTab = 'instore'; 
+let currentTab = 'pickup'; 
 
 function toggleAddAddress() {
     const el = document.getElementById("add-address-form");
@@ -1197,12 +1197,13 @@ function switchTab(tab) {
     document.getElementById('self-pickup-section').style.display = 'none';
     document.getElementById('standard-delivery-section').style.display = 'none';
 
-    if (tab === 'instore') {
+    // New order: 0: pickup, 1: instore, 2: standard
+    if (tab === 'pickup') {
         tabs[0].classList.add('active');
-        document.getElementById('instore-section').style.display = 'block';
-    } else if (tab === 'pickup') {
-        tabs[1].classList.add('active');
         document.getElementById('self-pickup-section').style.display = 'block';
+    } else if (tab === 'instore') {
+        tabs[1].classList.add('active');
+        document.getElementById('instore-section').style.display = 'block';
     } else if (tab === 'standard') {
         tabs[2].classList.add('active');
         document.getElementById('standard-delivery-section').style.display = 'block';
