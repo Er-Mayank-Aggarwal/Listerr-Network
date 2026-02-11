@@ -397,11 +397,14 @@
         <button class="header-follow-btn" id="follow-btn" onclick="toggleFollow(this)">Follow</button>
       </div>
       <div id="top-right-buttons" style="display: flex; gap: 3px; align-items: center; pointer-events: auto; position: absolute; top: 10px; right: 40px; height: 100%;">
-        <button id="audio-toggle" title="Toggle Audio" style="background: none; border: none; cursor: pointer; font-size: 22px; padding: 6px; border-radius: 50%; transition: background 0.2s;">
-          <span id="audio-icon"><i class="fa-solid fa-volume-xmark"></i></span>
+        <button id="audio-toggle" title="Toggle Audio" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 0; transition: none; width:40px; height:40px; display:flex; align-items:center; justify-content:center; box-shadow:none;">
+          <img id="audio-icon-img" src="audio-off.png" alt="Audio Icon" style="width:28px; height:28px; display:block;" />
         </button>
-        <button id="share-btn" title="Share" style="background: none; border: none; cursor: pointer; font-size: 22px; padding: 6px; border-radius: 50%; transition: background 0.2s;">
-          <span><i class="fa-solid fa-share-from-square"></i></span>
+        <button id="play-pause-btn" title="Play/Pause" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 50%; transition: background 0.2s; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+          <img id="play-pause-icon-img" src="pause.png" alt="Play/Pause Icon" style="width:28px; height:28px; display:block;" />
+        </button>
+        <button id="share-btn" title="Share" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 50%; transition: background 0.2s; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+          <img src="share.png" alt="Share Icon" style="width:28px; height:28px; display:block;" />
         </button>
       </div>
     </div>
@@ -454,26 +457,24 @@
     <script>
       // Audio and Share button logic
       let audioOn = false;
-      const audioIcon = document.getElementById('audio-icon');
+      const audioIconImg = document.getElementById('audio-icon-img');
       const audioToggle = document.getElementById('audio-toggle');
       function updateAudioToggleStyle() {
         audioToggle.classList.remove('audio-on', 'audio-off');
         audioToggle.classList.add(audioOn ? 'audio-on' : 'audio-off');
+        audioIconImg.src = audioOn ? 'audio-on.png' : 'audio-off.png';
       }
       audioToggle.addEventListener('click', () => {
         audioOn = !audioOn;
-        audioIcon.innerHTML = audioOn
-          ? '<i class="fa-solid fa-volume-high"></i>'
-          : '<i class="fa-solid fa-volume-xmark"></i>';
         const video = document.getElementById('video-el');
         if (video) {
           video.muted = !audioOn;
         }
         updateAudioToggleStyle();
         // Animation
-        audioIcon.classList.remove('audio-pop');
-        void audioIcon.offsetWidth; // force reflow
-        audioIcon.classList.add('audio-pop');
+        audioIconImg.classList.remove('audio-pop');
+        void audioIconImg.offsetWidth; // force reflow
+        audioIconImg.classList.add('audio-pop');
       });
       // Set initial style
       updateAudioToggleStyle();
@@ -499,6 +500,29 @@
           }
         }
       });
+
+      // Play/Pause button logic
+      let isPlaying = true; // Default to playing, so pause icon shows
+      const playPauseBtn = document.getElementById('play-pause-btn');
+      const playPauseIconImg = document.getElementById('play-pause-icon-img');
+      function updatePlayPauseIcon() {
+        playPauseIconImg.src = isPlaying ? 'pause.png' : 'play.png';
+      }
+      playPauseBtn.addEventListener('click', () => {
+        isPlaying = !isPlaying;
+        updatePlayPauseIcon();
+        // Optionally, control media playback here
+        const video = document.getElementById('video-el');
+        if (video) {
+          if (isPlaying) {
+            video.play();
+          } else {
+            video.pause();
+          }
+        }
+      });
+      // Set initial icon
+      updatePlayPauseIcon();
 
       function startResendTimer() {
   let seconds = 30;
@@ -570,7 +594,7 @@ async function handleVerifyOTP() {
       }
       if(data.user.id)
       {
-        userId.set(data.user.id);
+        window.userId.set(data.user.id);
       }
       msg.textContent = "Success! Redirecting...";
       const shouldAutoFollow = localStorage.getItem('PENDING_FOLLOW');
