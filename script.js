@@ -1,5 +1,4 @@
 
-import AuthToken from './auth-token.js';
 // 🔥 FORCE store context for cart isolation
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -8,15 +7,25 @@ document.addEventListener('DOMContentLoaded', async function () {
      1. FETCH DATA & RENDER CONTENT
   ========================================= */
   console.log("Script initializing...");
-  
+
   if (!window.StoreService) {
     console.error("StoreService missing! Check Catalog.html");
     return;
   }
 
   const storeData = await window.StoreService.getStoreData();
+  const totalItemsEl = document.getElementById("totalItemsCount");
+
+  if (totalItemsEl && storeData?.categories) {
+    const total = storeData.categories.reduce(
+      (sum, c) => sum + (c.products?.length || 0),
+      0
+    );
+    totalItemsEl.textContent = total;
+  }
+
   const productsSection = document.getElementById('products-section');
-  const modalList = document.getElementById('modalCategoryList'); 
+  const modalList = document.getElementById('modalCategoryList');
 
   // Handle loading/error state
   if (!storeData || !storeData.categories) {
@@ -33,17 +42,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // RENDER LOOP
   storeData.categories.forEach(category => {
-    
+
     // Create Category Section
     const section = document.createElement('div');
     section.className = 'category-section';
     section.id = `${category.id}-section`;
-    
+
     section.innerHTML = `
       <h3 class="category-title">${category.name}</h3>
       <div class="products-grid"></div> 
     `;
-    
+
     const grid = section.querySelector('.products-grid');
 
     // Create Product Cards
@@ -52,15 +61,15 @@ document.addEventListener('DOMContentLoaded', async function () {
       const currentQty = cart[prod.name] ? cart[prod.name].qty : 0;
       const imgSrc = prod.image ? prod.image : 'fallback.jpeg';
 
-const card = document.createElement('div');
-card.className = 'product-card';
-card.dataset.productId = prod.id;   // 🔥 ADD THIS
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.dataset.productId = prod.id;   // 🔥 ADD THIS
 
 
-// 🔥 Attach real category to card
-card.dataset.category = category.name;
+      // 🔥 Attach real category to card
+      card.dataset.category = category.name;
 
-      
+
       card.innerHTML = `
         <div class="product-image-container">
            ${prod.discount ? `<div class="discount-badge">${prod.discount}</div>` : ''}
@@ -98,7 +107,7 @@ card.dataset.category = category.name;
   /* =========================================
      2. CART INTERACTION
   ========================================= */
-  
+
   function getButtonHtml(qty) {
     if (qty > 0) {
       return `
@@ -113,11 +122,11 @@ card.dataset.category = category.name;
 
   // Global Click Listener for Cart Buttons
   // script.js - Updated Global Click Listener
-document.addEventListener('click', async function (e) {
+  document.addEventListener('click', async function (e) {
     const card = e.target.closest('.product-card');
-    
+
     // FIX: Safety check to prevent "Cannot read properties of null (reading 'dataset')"
-    if (!card) return; 
+    if (!card) return;
 
     const productId = card.dataset.productId;
     const name = card.querySelector('.product-name').textContent;
@@ -125,99 +134,101 @@ document.addEventListener('click', async function (e) {
     const price = parseFloat(priceRaw.replace(/[^\d.]/g, ''));
     const imgEl = card.querySelector('.product-image');
     const img = imgEl ? imgEl.src : 'fallback.jpeg';
-    
+
     let cart = window.StoreService.getCart();
 
     // --- ADD BUTTON ---
     if (e.target.classList.contains('add-btn')) {
-        // Local Update Only
-        cart[name] = { id: productId, price, qty: 1, img };
-        window.StoreService.saveCart(cart);
-        e.target.outerHTML = getButtonHtml(1);
-        updateParentBadge();
+      // Local Update Only
+      cart[name] = { id: productId, price, qty: 1, img };
+      window.StoreService.saveCart(cart);
+      e.target.outerHTML = getButtonHtml(1);
+      updateParentBadge();
     }
-    
+
     // --- PLUS BUTTON ---
     else if (e.target.classList.contains('plus')) {
-        cart[name].qty++;
-        const qtyDisplay = e.target.parentElement.querySelector('.qty-value');
-        if (qtyDisplay) qtyDisplay.textContent = cart[name].qty;
-        window.StoreService.saveCart(cart);
-        updateParentBadge();
+      cart[name].qty++;
+      const qtyDisplay = e.target.parentElement.querySelector('.qty-value');
+      if (qtyDisplay) qtyDisplay.textContent = cart[name].qty;
+      window.StoreService.saveCart(cart);
+      updateParentBadge();
     }
 
     // --- MINUS BUTTON ---
     else if (e.target.classList.contains('minus')) {
-        const newQty = cart[name].qty - 1;
-        if (newQty <= 0) {
-          delete cart[name];
-          const container = e.target.closest('.product-pricing');
-          if (container) container.innerHTML = `<button class="add-btn">ADD</button>`;
-        } else {
-          cart[name].qty = newQty;
-          const qtyDisplay = e.target.parentElement.querySelector('.qty-value');
-          if (qtyDisplay) qtyDisplay.textContent = newQty;
-        }
-        window.StoreService.saveCart(cart);
-        updateParentBadge();
+      const newQty = cart[name].qty - 1;
+      if (newQty <= 0) {
+        delete cart[name];
+        const container = e.target.closest('.product-pricing');
+        if (container) container.innerHTML = `<button class="add-btn">ADD</button>`;
+      } else {
+        cart[name].qty = newQty;
+        const qtyDisplay = e.target.parentElement.querySelector('.qty-value');
+        if (qtyDisplay) qtyDisplay.textContent = newQty;
+      }
+      window.StoreService.saveCart(cart);
+      updateParentBadge();
     }
-});
-/* =========================================
-   3. PRODUCT CARD NAVIGATION (FINAL)
-========================================= */
+  });
+  /* =========================================
+     3. PRODUCT CARD NAVIGATION (FINAL)
+  ========================================= */
 
-document.addEventListener('click', function (e) {
+  document.addEventListener('click', function (e) {
+    console.log("Click event:", e.target);
+    const card = e.target.closest('.product-card');
+    if (!card) return;
+    const productId = card.dataset.productId;   // 🔥 REQUIRED
+    if (!productId) {
+      console.error("❌ Invalid productId from card:", card.dataset.productId, card);
+      alert("Product ID error ❌ Please refresh");
+      return;
+    }
 
-  const card = e.target.closest('.product-card');
-  if (!card) return;
-  const productId = card.dataset.productId;   // 🔥 REQUIRED
-if (!productId) {
-  console.error("❌ Invalid productId from card:", card.dataset.productId, card);
-  alert("Product ID error ❌ Please refresh");
-  return;
-}
+    // Ignore clicks on cart controls
+    if (e.target.matches('.add-btn, .plus, .minus')) return;
 
-  // Ignore clicks on cart controls
-  if (e.target.matches('.add-btn, .plus, .minus')) return;
+    const name = card.querySelector('.product-name')?.textContent || '';
+    const priceRaw = card.querySelector('.current-price')?.textContent || '';
+    const price = parseFloat(priceRaw.replace(/[^\d.]/g, '')) || 0;
+    const img = card.querySelector('.product-image')?.src || '';
+    const mrpRaw = card.querySelector('.original-price')?.textContent || '';
+    const mrp = parseFloat(mrpRaw.replace(/[^\d.]/g, '')) || null;
+    const unit = card.querySelector('.product-quantity')?.textContent || '1 Unit';
 
-  const name = card.querySelector('.product-name')?.textContent || '';
-  const priceRaw = card.querySelector('.current-price')?.textContent || '';
-  const price = parseFloat(priceRaw.replace(/[^\d.]/g, '')) || 0;
-  const img = card.querySelector('.product-image')?.src || '';
-  const mrpRaw = card.querySelector('.original-price')?.textContent || '';
-  const mrp = parseFloat(mrpRaw.replace(/[^\d.]/g, '')) || null;
-  const unit = card.querySelector('.product-quantity')?.textContent || '1 Unit';
-
-  // Find product data from rendered storeData
-const categoryName = card.dataset.category || null;
+    // Find product data from rendered storeData
+    const categoryName = card.dataset.category || null;
 
 
-  const category = storeData.categories.find(c => c.name === categoryName);
-  const prod = category?.products.find(p => p.name === name);
+    const category = storeData.categories.find(c => c.name === categoryName);
+    const prod = category?.products.find(p => p.name === name);
 
-const selectedProduct = {
-  name,
-  price,
-  mrp,
-  unit,
-  image: img,
-  discount: prod?.discount || null,
+    const selectedProduct = {
+      id: productId,
+      name,
+      price,
+      mrp,
+      unit,
+      image: img,
+      discount: prod?.discount || null,
 
-  shelf_life: prod?.shelf_life || null,
-  store_name: storeData.name,
+      shelf_life: prod?.shelf_life || null,
+      store_name: storeData.name,
 
-  store_id: StoreService.getStoreId(),
-  category: categoryName || null
-};
+      store_id: StoreService.getStoreId(),
+      category: categoryName || null
+    };
 
-// 🔥 THIS WAS MISSING
-localStorage.setItem(
-  'selected_product',
-  JSON.stringify(selectedProduct)
-);
+    // 🔥 THIS WAS MISSING
+    localStorage.setItem(
+      'selected_product',
+      JSON.stringify(selectedProduct)
+    );
+    console.log("Navigating to product page with:", selectedProduct);
+    window.location.href = `product.html?pid=${productId}`;
 
-window.location.href = 'product.html';
-});
+  });
 
 
 
@@ -235,32 +246,10 @@ window.location.href = 'product.html';
       }
     } catch (e) { }
   }
-  
+
   updateParentBadge();
 
-  // Floating Menu Logic
-  const floatingBtn = document.getElementById('floatingCategoryBtn');
-  const categoryModal = document.getElementById('categoryModal');
 
-  if (floatingBtn && categoryModal) {
-    floatingBtn.addEventListener('click', () => categoryModal.style.display = 'block');
-    categoryModal.addEventListener('click', (e) => {
-      if (e.target === categoryModal) categoryModal.style.display = 'none';
-    });
-
-    if (modalList) {
-      modalList.addEventListener('click', (e) => {
-        const link = e.target.closest('.modal-category-link');
-        if (link) {
-          e.preventDefault();
-          const targetId = link.getAttribute('href').substring(1);
-          const el = document.getElementById(targetId);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-          categoryModal.style.display = 'none';
-        }
-      });
-    }
-  }
 
   // Grid/List Toggle
   let isList = false;
@@ -297,3 +286,20 @@ window.location.href = 'product.html';
     });
   }
 });
+
+const filterBtn = document.getElementById("filterBtn");
+const categoryModal = document.getElementById("categoryModal");
+
+if (filterBtn && categoryModal) {
+  filterBtn.addEventListener("click", () => {
+    categoryModal.style.display = "flex";
+  });
+}
+
+// close when clicking outside
+categoryModal?.addEventListener("click", (e) => {
+  if (e.target.id === "categoryModal") {
+    categoryModal.style.display = "none";
+  }
+});
+

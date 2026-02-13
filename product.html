@@ -136,6 +136,7 @@
             font-size: 16px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(66, 128, 253, 0.3);
+             font-family: 'Baloo 2', sans-serif;
         }
 
         /* QTY CONTROL (Same as Menu) */
@@ -229,7 +230,7 @@
 
         <div class="action-row">
             <div class="price-block">
-                <span class="price-label">Listerr Price: <span id="p-price">₹0</span></span>
+                <span class="price-label">Price: <span id="p-price">₹0</span></span>
                 <span class="mrp">MRP: <span id="p-mrp">₹0</span></span>
             </div>
             <div id="add-control-container">
@@ -238,26 +239,26 @@
         </div>
 
         <div class="sold-by">
-            Sold by <a href="#" class="sold-link">JARS N' MORE</a>
+            Sold by <a href="#" class="sold-link"></a>
         </div>
 
         <div class="section-title">More Information</div>
         <table class="info-table">
             <tr>
                 <td class="info-label">Shelf Life</td>
-                <td class="info-val">3 Days</td>
+                <td class="info-val"></td>
             </tr>
             <tr>
                 <td class="info-label">Unit</td>
-                <td class="info-val">Piece (Pc)</td>
+                <td class="info-val"></td>
             </tr>
             <tr>
                 <td class="info-label">Brand</td>
-                <td class="info-val">Jars n' More</td>
+                <td class="info-val"></td>
             </tr>
             <tr>
                 <td class="info-label">Type</td>
-                <td class="info-val">Fresh Bakery</td>
+                <td class="info-val"></td>
             </tr>
         </table>
 
@@ -269,8 +270,14 @@
 
     <script type="module" src="store-service.js"></script>
 
+<script type="module">
+  import { addItem, updateItem, removeItem } from './cart-api.js';
 
+  // expose for non-module script
+  window._cartApi = { addItem, updateItem, removeItem };
+</script>
 <script>
+  
   let product = null;
 async function syncProductCartFromServer() {
   const token = AuthToken.get();
@@ -313,14 +320,45 @@ async function syncProductCartFromServer() {
       }
     }
 
-    const data = localStorage.getItem('selected_product');
-    if (!data) {
-      console.error("No product data found in localStorage");
-      document.getElementById('p-name').textContent = "Product not found";
-      return;
-    }
+    const params = new URLSearchParams(window.location.search);
+const pid = params.get("pid");
 
-    product = JSON.parse(data);
+let data = localStorage.getItem('selected_product');
+
+if (data) {
+  product = JSON.parse(data);
+}
+
+/* 👇 if opened via share link */
+if ((!product || !product.id) && pid) {
+
+  const storeId = localStorage.getItem("active_store_id");
+  if (!storeId) {
+    document.getElementById('p-name').textContent = "Store not selected";
+    return;
+  }
+
+  const store =  window.StoreService.getStoreData();
+
+  for (const c of store.categories) {
+    const p = c.products.find(x => String(x.id) === String(pid));
+    if (p) {
+      product = {
+        ...p,
+        store_id: store.id,
+        store_name: store.name,
+        category: c.name
+      };
+      break;
+    }
+  }
+}
+
+if (!product) {
+  document.getElementById('p-name').textContent = "Product not found";
+  return;
+}
+
     // 🔥 Restore store context for cart isolation
 if (product.store_id) {
   localStorage.setItem("active_store_id", product.store_id);
@@ -396,7 +434,6 @@ if (infoRows[3]) {
 
 
 (async function() {
-  await syncProductCartFromServer();
   renderAddControl();
   updateCartBadge();
 })();
@@ -442,9 +479,11 @@ const currentQty = localCart[product.name]?.qty || 0;
 
   try {
     if (newQty <= 0) {
-      await removeItem(product.id);
+      await window._cartApi.removeItem(product.id, product.name);
+
     } else {
-      await updateItem(product.id, newQty);
+      await window._cartApi.updateItem(product.id, newQty, product.name);
+
     }
 const localCart = window.StoreService.getCart();
 
@@ -480,12 +519,21 @@ async function addToCartFromPage() {
   }
 
   try {
-    await addItem(pid, 1);   // 🔥 USE OFFICIAL API LAYER
-    alert("Added to cart 🛒✅");
+    await window._cartApi.addItem(
+
+  product.id,
+  1,
+  product.name,
+  product.price,
+  product.image
+);
   } catch (e) {
     console.error("Add to cart failed:", e);
     alert("Login required or cannot add ❌");
   }
+  renderAddControl();
+updateCartBadge();
+
 }
 
 
