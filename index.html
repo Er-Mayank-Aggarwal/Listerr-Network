@@ -21,6 +21,15 @@
     window.userId = userId;
   </script>
   <script type="module" src="firebase-login.js"></script>
+      <script>
+        // Hide Login Modal function (global)
+        function hideLoginModal(event) {
+          // Only close if overlay or close button is clicked
+          if (!event || event.target === document.getElementById('login-modal') || event.target.getAttribute('aria-label') === 'Close') {
+            document.getElementById('login-modal').style.display = 'none';
+          }
+        }
+      </script>
   <script src="phone-helper.js"></script>
   <style>
         /* Animation for audio icon pop */
@@ -403,7 +412,10 @@
       </div>
     </div>
     <div id="login-modal" class="login-overlay" onclick="hideLoginModal(event)">
-      <div class="login-card minimal" onclick="event.stopPropagation()">
+      <div class="login-card minimal" onclick="event.stopPropagation()" style="position:relative;">
+        <button aria-label="Close" onclick="hideLoginModal(event)" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;line-height:1;color:#4280FD;cursor:pointer;z-index:10;">
+          &times;
+        </button>
         <div class="login-logo">
           <img src="Listerr_logo.png" alt="Logo" class="logo-icon" style="width: 70px; height:70px; object-fit:contain;">
         </div>
