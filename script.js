@@ -1,4 +1,3 @@
-
 // 🔥 FORCE store context for cart isolation
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -13,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     return;
   }
 
+  // Use cached data if available
   const storeData = await window.StoreService.getStoreData();
   const totalItemsEl = document.getElementById("totalItemsCount");
 

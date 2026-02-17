@@ -10,6 +10,7 @@ const BASE_URL =
 window.BASE_URL = BASE_URL;
 
 let _cachedStoreId = null;
+let _cachedStoreData = null;
 
 const StoreService = {
   /* ===============================
@@ -59,47 +60,44 @@ const StoreService = {
      2. FETCH STORE DATA (AUTH + API)
      USES: /api/v1/stores/{id}
   =============================== */
-  getStoreData: async () => {
+  getStoreData: async (forceRefresh = false) => {
+    if (!forceRefresh && _cachedStoreData) {
+      return _cachedStoreData;
+    }
+    // Try sessionStorage cache (for cross-page/iframe)
+    if (!forceRefresh && !_cachedStoreData) {
+      const sessionCache = sessionStorage.getItem('cachedStoreData');
+      if (sessionCache) {
+        _cachedStoreData = JSON.parse(sessionCache);
+        return _cachedStoreData;
+      }
+    }
     const storeId = StoreService.getStoreId();
-
     const token = AuthToken.get();
-
     if (!storeId) {
       throw new Error("Missing store ID in URL (?store=2)");
     }
-
-    // Persist store id for iframe safety
     localStorage.setItem("active_store_id", storeId);
-
     console.log(`[StoreService] Loading store ${storeId}`);
-
     const headers = {
       Authorization: `Bearer ${token}`
     };
-
-    /* ---------- 1. GET STORE WITH CATEGORIES + PRODUCTS ---------- */
     const storeRes = await fetch(
       `${BASE_URL}/api/v1/stores/${storeId}`,
       { headers }
     );
-
     if (!storeRes.ok) {
       throw new Error("Failed to fetch store data");
     }
-
     const store = await storeRes.json();
-
     if (!store || !store.categories) {
       throw new Error("Invalid store payload from API");
     }
-
-    /* ---------- 2. NORMALIZE STORE OBJECT ---------- */
     const categories = store.categories.map(cat => ({
       id: cat.id,
       name: cat.name,
       products: (cat.products || []).map(p => ({
-id: p.id || p.product_id|| null,
-
+        id: p.id || p.product_id|| null,
         name: p.name,
         price: p.price,
         mrp: p.mrp,
@@ -109,16 +107,18 @@ id: p.id || p.product_id|| null,
         stock: p.stock || null
       }))
     }));
-    // store-service.js - Update the return statement in getStoreData
-return {
-  id: store.id,
-  name: store.name,
-  logo: store.logo, // Add this to show the store icon in index.html
-  address: store.address,
-  video: store.video, 
-  poster: store.poster,
-  categories
-};
+    _cachedStoreData = {
+      id: store.id,
+      name: store.name,
+      logo: store.logo,
+      address: store.address,
+      video: store.video,
+      poster: store.poster,
+      categories
+    };
+    // Save to sessionStorage for cross-page/iframe cache
+    sessionStorage.setItem('cachedStoreData', JSON.stringify(_cachedStoreData));
+    return _cachedStoreData;
   },
 
   /* ===============================
