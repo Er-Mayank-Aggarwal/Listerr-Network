@@ -21,75 +21,93 @@
     window.userId = userId;
   </script>
   <script type="module" src="firebase-login.js"></script>
-        <script>
-          // Show/hide logout button based on login state
-          function updateLogoutButton() {
-            const btn = document.getElementById('logout-btn');
-            if (!btn) return;
-            if (window.AuthToken && window.AuthToken.get()) {
-              btn.style.display = 'inline-block';
-            } else {
-              btn.style.display = 'none';
-            }
-          }
-          document.addEventListener('DOMContentLoaded', function() {
+  <script>
+    // Show/hide logout button based on login state
+    function updateLogoutButton() {
+      const btn = document.getElementById('logout-btn');
+      if (!btn) return;
+      if (window.AuthToken && window.AuthToken.get()) {
+        btn.style.display = 'inline-block';
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      updateLogoutButton();
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function () {
+          if (confirm('Do you want to logout?')) {
+            if (window.AuthToken) window.AuthToken.clear();
+            if (window.userId) window.userId.clear();
             updateLogoutButton();
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-              logoutBtn.addEventListener('click', function() {
-                if (confirm('Do you want to logout?')) {
-                  if (window.AuthToken) window.AuthToken.clear();
-                  if (window.userId) window.userId.clear();
-                  updateLogoutButton();
-                  window.location.reload();
-                }
-              });
-            }
-          });
-          window.addEventListener('storage', function(e) {
-            if (e.key === 'AUTH_TOKEN') updateLogoutButton();
-          });
-        </script>
-      <script>
-        // Hide Login Modal function (global)
-        function hideLoginModal(event) {
-          // Only close if overlay or close button is clicked
-          if (!event || event.target === document.getElementById('login-modal') || event.target.getAttribute('aria-label') === 'Close') {
-            document.getElementById('login-modal').style.display = 'none';
+            window.location.reload();
           }
-        }
-      </script>
+        });
+      }
+    });
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'AUTH_TOKEN') updateLogoutButton();
+    });
+  </script>
+  <script>
+    // Hide Login Modal function (global)
+    function hideLoginModal(event) {
+      // Only close if overlay or close button is clicked
+      if (!event || event.target === document.getElementById('login-modal') || event.target.getAttribute('aria-label') === 'Close') {
+        document.getElementById('login-modal').style.display = 'none';
+      }
+    }
+  </script>
   <script src="phone-helper.js"></script>
   <style>
-        /* Animation for audio icon pop */
-        .audio-pop {
-          animation: audioPop 0.35s;
-        }
-        @keyframes audioPop {
-          0% { transform: scale(1); }
-          40% { transform: scale(1.25); }
-          60% { transform: scale(0.95); }
-          100% { transform: scale(1); }
-        }
-        #audio-toggle {
-          transition: background 0.2s, box-shadow 0.2s;
-        }
-        #audio-toggle.audio-on {
-          background: #4280FD;
-          box-shadow: 0 2px 12px rgba(66,128,253,0.18);
-        }
-        #audio-toggle.audio-off {
-          background: #eee;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-        }
-        #audio-toggle .fa-volume-high {
-          color: #fff;
-          text-shadow: 0 2px 8px rgba(66,128,253,0.18);
-        }
-        #audio-toggle .fa-volume-xmark {
-          color: #4280FD;
-          text-shadow: 0 2px 8px rgba(66,128,253,0.10);
-        }
+    /* Animation for audio icon pop */
+    .audio-pop {
+      animation: audioPop 0.35s;
+    }
+
+    @keyframes audioPop {
+      0% {
+        transform: scale(1);
+      }
+
+      40% {
+        transform: scale(1.25);
+      }
+
+      60% {
+        transform: scale(0.95);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    #audio-toggle {
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    #audio-toggle.audio-on {
+      background: #4280FD;
+      box-shadow: 0 2px 12px rgba(66, 128, 253, 0.18);
+    }
+
+    #audio-toggle.audio-off {
+      background: #eee;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+    }
+
+    #audio-toggle .fa-volume-high {
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(66, 128, 253, 0.18);
+    }
+
+    #audio-toggle .fa-volume-xmark {
+      color: #4280FD;
+      text-shadow: 0 2px 8px rgba(66, 128, 253, 0.10);
+    }
+
     :root {
       --listerr-blue: #4280FD;
       --listerr-grey: #474747;
@@ -388,33 +406,134 @@
 
     /* Overlay & Login Modal Styles */
     .login-overlay {
-      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
-      display: none; align-items: center; justify-content: center;
-      z-index: 9999; backdrop-filter: blur(2px);
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(2px);
     }
+
     .login-card {
-      background: #fff; width: 100%; max-width: 360px; border-radius: 18px;
-      padding: 28px 22px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
-      animation: slideUp 0.3s ease-out; display: flex; flex-direction: column; align-items: center;
+      background: #fff;
+      width: 100%;
+      max-width: 360px;
+      border-radius: 18px;
+      padding: 28px 22px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+      animation: slideUp 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .login-title { margin: 0; color: #4280FD; font-size: 22px; font-weight: 800; }
-    .login-subtitle { margin: 6px 0 20px; font-size: 13px; color: #777; text-align: center; }
+
+    .login-title {
+      margin: 0;
+      color: #4280FD;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .login-subtitle {
+      margin: 6px 0 20px;
+      font-size: 13px;
+      color: #777;
+      text-align: center;
+    }
+
     .phone-input {
-      display: flex; align-items: center; width: 100%; height: 52px;
-      background: #eef5ff; border-radius: 14px; padding: 0 14px; box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 52px;
+      background: #eef5ff;
+      border-radius: 14px;
+      padding: 0 14px;
+      box-sizing: border-box;
     }
-    .country-code { font-size: 16px; font-weight: 600; color: #555; margin-right: 8px; }
+
+    .country-code {
+      font-size: 16px;
+      font-weight: 600;
+      color: #555;
+      margin-right: 8px;
+    }
+
     .primary-btn {
-      width: 100%; padding: 12px; background: #4280FD; color: #fff;
-      border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 8px;
+      width: 100%;
+      padding: 12px;
+      background: #4280FD;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
     }
-    .otp-section { display: none; width: 100%; margin-top: 14px; }
-    .otp-section input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; }
-    .otp-message { min-height: 18px; margin-top: 8px; font-size: 13px; color: #e53935; }
-    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .input-box { width: 100%; height: 52px; padding: 0 16px; border-radius: 14px; border: none; background: #eef5ff; font-size: 16px; outline: none; box-sizing: border-box; margin-bottom: 10px; }
-    .phone-input input { border: none; background: transparent; padding: 12px; flex: 1; font-size: 16px; outline: none; height: 100%; }
-    .recaptcha-box { height: 1px; overflow: hidden; margin-top: 10px; }
+
+    .otp-section {
+      display: none;
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .otp-section input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    .otp-message {
+      min-height: 18px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #e53935;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .input-box {
+      width: 100%;
+      height: 52px;
+      padding: 0 16px;
+      border-radius: 14px;
+      border: none;
+      background: #eef5ff;
+      font-size: 16px;
+      outline: none;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+
+    .phone-input input {
+      border: none;
+      background: transparent;
+      padding: 12px;
+      flex: 1;
+      font-size: 16px;
+      outline: none;
+      height: 100%;
+    }
+
+    .recaptcha-box {
+      height: 1px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -427,29 +546,38 @@
           onload="this.style.display='block'" />
         <div class="header-logo" id="store-name">Loading...</div>
         <button class="header-follow-btn" id="follow-btn" onclick="toggleFollow(this)">Follow</button>
-        <button id="logout-btn" title="Logout" style="display:none; background:none; border:none; cursor:pointer; margin-left:4px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; z-index:1001; pointer-events:auto;">
-          <i class="fas fa-sign-out-alt" style="font-size: 20px; color: #4280FD;"></i>
-        </button>
       </div>
-      <div id="top-right-buttons" style="display: flex; gap: 2px; align-items: center; pointer-events: auto; position: absolute; top: 10px; right: 35px; height: 100%;">
-        <button id="audio-toggle" title="Toggle Audio" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 0; transition: none; width:40px; height:40px; display:flex; align-items:center; justify-content:center; box-shadow:none;">
-          <img id="audio-icon-img" src="audio-off.png" alt="Audio Icon" style="width:21px; height:21px; display:block;" />
+      <button id="logout-btn" title="Logout"
+        style="display:none; background:none; border:none; cursor:pointer; margin-left: auto; margin-right: 12px; width:60px; height:60px; display:flex; align-items:center; justify-content:center; z-index:1001; pointer-events:auto;">
+        <i class="fa fa-user" style="font-size: 20px; color: #000000;"></i>
+      </button>
+      <div id="top-right-buttons"
+        style="display: flex; flex-direction: column;gap: 40px; align-items: center; pointer-events: auto; position: absolute; top: 45vh; right: 40px; height: 100%;">
+        <button id="audio-toggle" title="Toggle Audio"
+          style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 0; transition: none; width:40px; height:40px; display:flex; align-items:center; justify-content:center; box-shadow:none;">
+          <img id="audio-icon-img" src="audio-off.png" alt="Audio Icon"
+            style="width:30px; height:30px; display:block;" />
         </button>
-        <button id="play-pause-btn" title="Play/Pause" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 50%; transition: background 0.2s; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
-          <img id="play-pause-icon-img" src="pause.png" alt="Play/Pause Icon" style="width:21px; height:21px; display:block;" />
+        <button id="play-pause-btn" title="Play/Pause"
+          style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 50%; transition: background 0.2s; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+          <img id="play-pause-icon-img" src="pause.png" alt="Play/Pause Icon"
+            style="width:350x; height:30px; display:block;" />
         </button>
-        <button id="share-btn" title="Share" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 50%; transition: background 0.2s; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
-          <img src="share.png" alt="Share Icon" style="width:21px; height:21px; display:block;" />
+        <button id="share-btn" title="Share"
+          style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 50%; transition: background 0.2s; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+          <img src="share.png" alt="Share Icon" style="width:30px; height:30px; display:block;" />
         </button>
       </div>
     </div>
     <div id="login-modal" class="login-overlay" onclick="hideLoginModal(event)">
       <div class="login-card minimal" onclick="event.stopPropagation()" style="position:relative;">
-        <button aria-label="Close" onclick="hideLoginModal(event)" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;line-height:1;color:#4280FD;cursor:pointer;z-index:10;">
+        <button aria-label="Close" onclick="hideLoginModal(event)"
+          style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;line-height:1;color:#4280FD;cursor:pointer;z-index:10;">
           &times;
         </button>
         <div class="login-logo">
-          <img src="Listerr_logo.png" alt="Logo" class="logo-icon" style="width: 70px; height:70px; object-fit:contain;">
+          <img src="Listerr_logo.png" alt="Logo" class="logo-icon"
+            style="width: 70px; height:70px; object-fit:contain;">
         </div>
         <h2 class="welcome-title">Welcome</h2>
         <p class="welcome-subtitle">Login to your account</p>
@@ -457,7 +585,8 @@
         <div id="login-section">
           <input id="login-name" type="text" class="input-box" placeholder="Your name" />
           <div class="phone-input">
-            <select id="login-country-code" class="country-code" style="height: 40px; width: 110px; border: none; background: transparent; font-size: 16px; outline: none;">
+            <select id="login-country-code" class="country-code"
+              style="height: 40px; width: 110px; border: none; background: transparent; font-size: 16px; outline: none;">
               <option value="+91" selected>🇮🇳 +91</option>
               <option value="+1">🇺🇸 +1</option>
               <option value="+44">🇬🇧 +44</option>
@@ -485,13 +614,14 @@
         <div id="otp-section" class="otp-section" style="display:none; width:100%;">
           <input id="otp-code" type="text" class="input-box" placeholder="Enter 6-digit OTP" />
           <button class="primary-btn" onclick="handleVerifyOTP()">VERIFY OTP</button>
-          <button id="resend-otp-btn" class="primary-btn" style="background:#eee;color:#4280FD;margin-top:8px;" onclick="resendOTP()" disabled>Resend OTP <span id="resend-timer">30</span>s</button>
+          <button id="resend-otp-btn" class="primary-btn" style="background:#eee;color:#4280FD;margin-top:8px;"
+            onclick="resendOTP()" disabled>Resend OTP <span id="resend-timer">30</span>s</button>
           <div id="otp-message" class="otp-message"></div>
           <div id="recaptcha-container" class="recaptcha-box"></div>
         </div>
       </div>
     </div>
-  <script type="module" src="firebase-login.js"></script>
+    <script type="module" src="firebase-login.js"></script>
     <script>
       // Audio and Share button logic
       let audioOn = false;
@@ -563,129 +693,128 @@
       updatePlayPauseIcon();
 
       function startResendTimer() {
-  let seconds = 30;
-  const timerSpan = document.getElementById('resend-timer');
-  const resendBtn = document.getElementById('resend-otp-btn');
-  
-  const interval = setInterval(() => {
-    seconds--;
-    if (timerSpan) timerSpan.textContent = seconds;
-    
-    if (seconds <= 0) {
-      clearInterval(interval);
-      if (resendBtn) {
-        resendBtn.disabled = false;
-        resendBtn.innerHTML = 'Resend OTP';
-      }
-    }
-  }, 1000);
-}
-async function handleVerifyOTP() {
-  const msg = document.getElementById('otp-message');
-  const otp = document.getElementById('otp-code').value.trim();
-  
-  if (!window.confirmationResult) {
-    msg.textContent = "Please request OTP first.";
-    return;
-  }
-  
-  msg.textContent = "Verifying...";
-  
-  try {
-    // 1. Confirm OTP with Firebase
-    const result = await window.confirmationResult.confirm(otp);
-    const firebase_uid = result.user.uid; // Extract UID from Firebase result
-    
-    const phone = document.getElementById('login-phone')?.value.trim() || '';
-    const code = document.getElementById('login-country-code')?.value || '';
-    const name = document.getElementById('login-name')?.value.trim() || 'Guest User';
-    const fullPhone = code + phone;
-    const baseUrl = window.BASE_URL || '';
-    
-    // 2. Attempt Login
-    let resp = await fetch(baseUrl + '/api/v1/auth/phone-login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: fullPhone })
-    });
+        let seconds = 30;
+        const timerSpan = document.getElementById('resend-timer');
+        const resendBtn = document.getElementById('resend-otp-btn');
 
-    // 3. Check for 404 - If user doesn't exist, Register them
-    if (resp.status === 404) {
-      msg.textContent = "Creating account...";
-      resp = await fetch(baseUrl + '/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name,
-          phone: fullPhone,
-          firebase_uid: firebase_uid
-        })
-      });
-    }
+        const interval = setInterval(() => {
+          seconds--;
+          if (timerSpan) timerSpan.textContent = seconds;
 
-    const data = await resp.json().catch(() => ({}));
+          if (seconds <= 0) {
+            clearInterval(interval);
+            if (resendBtn) {
+              resendBtn.disabled = false;
+              resendBtn.innerHTML = 'Resend OTP';
+            }
+          }
+        }, 1000);
+      }
+      async function handleVerifyOTP() {
+        const msg = document.getElementById('otp-message');
+        const otp = document.getElementById('otp-code').value.trim();
 
-    // 4. Handle Final Response (from Login or Register)
-    if (resp.ok) {
-      if (data && data.access_token) {
-        AuthToken.set(data.access_token);
+        if (!window.confirmationResult) {
+          msg.textContent = "Please request OTP first.";
+          return;
+        }
+
+        msg.textContent = "Verifying...";
+
+        try {
+          // 1. Confirm OTP with Firebase
+          const result = await window.confirmationResult.confirm(otp);
+          const firebase_uid = result.user.uid; // Extract UID from Firebase result
+
+          const phone = document.getElementById('login-phone')?.value.trim() || '';
+          const code = document.getElementById('login-country-code')?.value || '';
+          const name = document.getElementById('login-name')?.value.trim() || 'Guest User';
+          const fullPhone = code + phone;
+          const baseUrl = window.BASE_URL || '';
+
+          // 2. Attempt Login
+          let resp = await fetch(baseUrl + '/api/v1/auth/phone-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: fullPhone })
+          });
+
+          // 3. Check for 404 - If user doesn't exist, Register them
+          if (resp.status === 404) {
+            msg.textContent = "Creating account...";
+            resp = await fetch(baseUrl + '/api/v1/auth/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: name,
+                phone: fullPhone,
+                firebase_uid: firebase_uid
+              })
+            });
+          }
+
+          const data = await resp.json().catch(() => ({}));
+
+          // 4. Handle Final Response (from Login or Register)
+          if (resp.ok) {
+            if (data && data.access_token) {
+              AuthToken.set(data.access_token);
+            }
+            if (data.user.id) {
+              window.userId.set(data.user.id);
+            }
+            msg.textContent = "Success! Redirecting...";
+            const shouldAutoFollow = localStorage.getItem('PENDING_FOLLOW');
+            if (shouldAutoFollow === 'true') {
+              localStorage.removeItem('PENDING_FOLLOW');
+
+              // Call the follow API immediately
+              try {
+                await fetch(`${window.BASE_URL}/api/v1/stores/${CACHED_STORE_ID}/follow`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${data.access_token}`
+                  },
+                  body: JSON.stringify({ store_id: parseInt(CACHED_STORE_ID) })
+                });
+              } catch (e) {
+                console.error("Auto-follow failed", e);
+              }
+            }
+            window.location.href = "index.html";
+          } else {
+            msg.textContent = data.detail || data.message || "Authentication failed.";
+          }
+        } catch (err) {
+          console.error("OTP Error:", err);
+          msg.textContent = "Invalid OTP or connection error. Try again.";
+        }
       }
-      if(data.user.id)
-      {
-        window.userId.set(data.user.id);
-      }
-      msg.textContent = "Success! Redirecting...";
-      const shouldAutoFollow = localStorage.getItem('PENDING_FOLLOW');
-      if (shouldAutoFollow === 'true') {
-      localStorage.removeItem('PENDING_FOLLOW');
-      
-      // Call the follow API immediately
-      try {
-        await fetch(`${window.BASE_URL}/api/v1/stores/${CACHED_STORE_ID}/follow`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${data.access_token}`
-          },
-          body: JSON.stringify({ store_id: parseInt(CACHED_STORE_ID) })
+      /* ========= ======== RESEND OTP ================= */
+      function resendOTP() {
+        const phone = document.getElementById('login-phone').value.trim();
+        const code = document.getElementById('login-country-code').value;
+        setFirebasePhoneInput(code, phone);
+        const btn = document.getElementById('resend-otp-btn');
+        const msg = document.getElementById('otp-message');
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "SENDING…";
+        }
+        window.sendOTP(function (success) {
+          if (success) {
+            msg.textContent = "OTP resent successfully!";
+            if (btn) {
+              btn.innerHTML = 'Resend OTP <span id="resend-timer">30</span>s';
+            }
+            startResendTimer();
+          } else {
+            msg.textContent = "Failed to resend OTP. Try again.";
+            if (btn) btn.disabled = false;
+          }
         });
-      } catch (e) {
-        console.error("Auto-follow failed", e);
       }
-    }
-      window.location.href = "index.html";
-    } else {
-      msg.textContent = data.detail || data.message || "Authentication failed.";
-    }
-  } catch (err) {
-    console.error("OTP Error:", err);
-    msg.textContent = "Invalid OTP or connection error. Try again.";
-  }
-}
-/* ========= ======== RESEND OTP ================= */
-function resendOTP() {
-  const phone = document.getElementById('login-phone').value.trim();
-  const code = document.getElementById('login-country-code').value;
-  setFirebasePhoneInput(code, phone);
-  const btn = document.getElementById('resend-otp-btn');
-  const msg = document.getElementById('otp-message');
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "SENDING…";
-  }
-  window.sendOTP(function(success) {
-    if (success) {
-      msg.textContent = "OTP resent successfully!";
-      if (btn) {
-        btn.innerHTML = 'Resend OTP <span id="resend-timer">30</span>s';
-      }
-      startResendTimer();
-    } else {
-      msg.textContent = "Failed to resend OTP. Try again.";
-      if (btn) btn.disabled = false;
-    }
-  });
-}
       window.sendOTP = function (callback) {
         const phone = document.getElementById('login-phone').value.trim();
         const code = document.getElementById('login-country-code').value;
@@ -753,8 +882,7 @@ function resendOTP() {
               if (data && data.access_token) {
                 AuthToken.set(data.access_token);
               }
-              if(data.user.id)
-              {
+              if (data.user.id) {
                 window.userId.set(data.user.id);
               }
               msg.textContent = "Success! Redirecting...";
@@ -807,13 +935,13 @@ function resendOTP() {
           document.getElementById('store-name').textContent = data.name;
           document.title = data.name + " - Listerr Edition";
           console.log('Setting video src to:', data.video);
-const video = document.getElementById('video-el');
-const source = document.getElementById('video-source');
+          const video = document.getElementById('video-el');
+          const source = document.getElementById('video-source');
 
-if (data.video) {
-  source.src = data.video;
-  video.load();
-}
+          if (data.video) {
+            source.src = data.video;
+            video.load();
+          }
           // B. Update Logo
           const logoImg = document.getElementById('store-logo');
           if (data.logo) {
@@ -852,7 +980,7 @@ if (data.video) {
             followBtn.textContent = 'Follow';
           }
 
-        
+
         }
       });
       // Try to set user image if available (replace with your logic)
@@ -966,23 +1094,15 @@ if (data.video) {
       <div class="swipe-arrow"></div>
       <div class="swipe-text">View Menu</div>
     </div>
-<!-- HERO BACKGROUND VIDEO -->
-<div id="hero-video-container"
-     style="position:absolute; inset:0; z-index:1; overflow:hidden;">
+    <!-- HERO BACKGROUND VIDEO -->
+    <div id="hero-video-container" style="position:absolute; inset:0; z-index:1; overflow:hidden;">
 
-  <video
-    id="video-el"
-    autoplay
-    loop
-    muted
-    playsinline
-    preload="auto"
-    style="width:100%; height:100%; object-fit:cover;"
-  >
-    <source id="video-source" src="" type="video/mp4">
-  </video>
+      <video id="video-el" autoplay loop muted playsinline preload="auto"
+        style="width:100%; height:100%; object-fit:cover;">
+        <source id="video-source" src="" type="video/mp4">
+      </video>
 
-</div>
+    </div>
 
     <div id="catalog-drawer">
       <div class="catalog-header">
